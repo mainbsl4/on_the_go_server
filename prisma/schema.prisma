@@ -1,0 +1,90 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id              String            @id @default(uuid())
+  userName        String
+  email           String            @unique
+  password        String
+  mobile          String            @unique
+  companyName     String
+  bisunessAdd     String
+  country         String
+  city            String
+  visa_apply      Visa_Apply[]
+  loan_request    Loan_Request[]
+  deposit_request Deposit_Request[]
+  role            String            @default("user")
+  isApproved      Boolean           @default(false)
+  created_at      DateTime          @default(now())
+}
+
+model Mst_Bank_Details {
+  id         String   @id @default(uuid())
+  bankName   String
+  accName    String
+  accNo      String
+  branch     String
+  created_at DateTime @default(now())
+}
+
+model Visa_Apply {
+  id               String   @id @default(uuid())
+  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId           String
+  givenName        String
+  surName          String
+  gender           String
+  nationality      String
+  passportNo       String
+  passExpiryDate   String
+  dob              String
+  mobileNo         String?
+  email            String?
+  profession       String?
+  localAdd         String?
+  foreignAdd       String?
+  isApproved       String   @default("SUBMITTED")
+  passportPdf      String
+  otherDocumentPdf String
+  image            String
+  created_at       DateTime @default(now())
+}
+
+model Deposit_Request {
+  id         String   @id @default(uuid())
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId     String
+  dpType     String
+  date       String
+  amount     Float
+  bankName   String
+  chequeNo   String?
+  paySlip    String?
+  slipImage  String?
+  created_at DateTime @default(now())
+}
+
+model Loan_Request {
+  id            String   @id @default(uuid())
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId        String
+  reqDate       String
+  settlmentDate String
+  amount        Float
+  remarks       String?
+  refNo         String
+  created_at    DateTime @default(now())
+}
