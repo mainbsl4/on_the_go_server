@@ -4,7 +4,7 @@ const router = express.Router();
 
 router.post("/register",  createUser);
 router.post("/login",  loginUser);
-router.post("/userApprove/:id",  isUserApproved);
+router.put("/userApprove/:id",  isUserApproved);
 router.get("/allUsers",  getUsers);
 router.post("/:id",  getUser);
 router.put("/update/:id",  updateUser);

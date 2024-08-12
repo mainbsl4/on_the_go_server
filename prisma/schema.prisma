@@ -16,13 +16,14 @@ datasource db {
 model User {
   id              String            @id @default(uuid())
   userName        String
+  regNo           String
   email           String            @unique
   password        String
   mobile          String            @unique
   companyName     String
   bisunessAdd     String
   country         String
-  city            String
+  city            String?
   visa_apply      Visa_Apply[]
   loan_request    Loan_Request[]
   deposit_request Deposit_Request[]
@@ -37,6 +38,8 @@ model Mst_Bank_Details {
   accName    String
   accNo      String
   branch     String
+  routingNo  String
+  district   String
   created_at DateTime @default(now())
 }
 
@@ -45,20 +48,30 @@ model Visa_Apply {
   user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId           String
   givenName        String
-  surName          String
+  surName          String?
   gender           String
   nationality      String
+  buyingPrise      Float?
+  sellingPrise     Float?
+  trackingId       String?
+  applyForCountry  String
+  deliveredVisa    String?
+  applicationCopy  String?
+  paymentReceive   String?
   passportNo       String
   passExpiryDate   String
   dob              String
+  religion         String?
   mobileNo         String?
   email            String?
   profession       String?
   localAdd         String?
   foreignAdd       String?
+  comment          String?
   isApproved       String   @default("SUBMITTED")
   passportPdf      String
-  otherDocumentPdf String
+  otherDocumentPdf String?
+  previousPassPdf  String?
   image            String
   created_at       DateTime @default(now())
 }
@@ -71,9 +84,12 @@ model Deposit_Request {
   date       String
   amount     Float
   bankName   String
+  trnId      String?
   chequeNo   String?
   paySlip    String?
   slipImage  String?
+  comment    String?
+  isApproved String   @default("SUBMITTED")
   created_at DateTime @default(now())
 }
 
@@ -85,6 +101,7 @@ model Loan_Request {
   settlmentDate String
   amount        Float
   remarks       String?
-  refNo         String
+  comment       String?
+  isApproved    String   @default("SUBMITTED")
   created_at    DateTime @default(now())
 }

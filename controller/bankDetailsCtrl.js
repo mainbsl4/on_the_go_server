@@ -6,14 +6,17 @@ const asyncHandler = require("express-async-handler");
 
 const createBankDetails = asyncHandler(async (req, res) => {
 
-    const { bankName, accName, accNo, branch } = req.body;
+    const { bankName, accName, accNo, branch, district , routingNo} = req.body;
 
     const newBank = await prisma.mst_Bank_Details.create({
         data: {
             bankName: bankName,
             accName: accName,
             accNo: accNo,
-            branch: branch
+            branch: branch,
+            district: district,
+            routingNo: routingNo
+
         }
     })
     return res.json({ status: 200, newBank })
@@ -34,7 +37,8 @@ const getaBankDetails = asyncHandler(async (req, res) => {
     const bankDetails = await prisma.mst_Bank_Details.findFirst({
       where: {
         id: id
-      }
+      },
+      include: { user: true, },
     })
     return res.json({ status: 200, data: bankDetails })
   });
@@ -43,7 +47,7 @@ const getaBankDetails = asyncHandler(async (req, res) => {
 
 const updateBankDetails = asyncHandler(async (req, res) => {
     const id = req.params.id;
-    const {  bankName, accName, accNo, branch, created_at, } = req.body;
+    const {  bankName, accName, accNo, branch, created_at, routingNo, district} = req.body;
   
     const bankDataToUpdate = {}; // Initialize an empty object to store the fields to update
   
@@ -52,6 +56,8 @@ const updateBankDetails = asyncHandler(async (req, res) => {
     if (accName !== undefined) bankDataToUpdate.accName = accName;
     if (accNo !== undefined) bankDataToUpdate.accNo = accNo;
     if (branch !== undefined) bankDataToUpdate.branch = branch;
+    if (routingNo !== undefined) bankDataToUpdate.routingNo = routingNo;
+    if (district !== undefined) bankDataToUpdate.district = district;
     if (created_at !== undefined) bankDataToUpdate.created_at = created_at;
   
     // Update the user with the provided data

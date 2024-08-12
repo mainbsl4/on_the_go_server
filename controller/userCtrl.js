@@ -5,9 +5,107 @@ const bcrypt = require('bcrypt');
 
 
 
+// const createUser = asyncHandler(async (req, res) => {
+//   try {
+//     const { userName, email, password, mobile, companyName, bisunessAdd, country, city  } = req.body;
+
+//     // Check if the user already exists
+//     const findUser = await prisma.user.findUnique({
+//       where: { email: email }
+//     });
+
+//     if (findUser) {
+//       throw new Error("User already exists");
+//     }
+
+//     // Hash the password
+//     const hashedPassword = await bcrypt.hash(password, 10);
+
+//     // Create the new user
+//     const newUser = await prisma.user.create({
+//       data: {
+//         userName: userName,
+//         email: email,
+//         password: hashedPassword, // Store the hashed password
+//         mobile: mobile,
+//         companyName: companyName,
+//         bisunessAdd: bisunessAdd,
+//         country: country,
+//         city: city || null,
+//         regNo: regNo,
+
+//       }
+//     });
+
+//     // Generate JWT token
+//     const token = jwt.sign({ userId: newUser.id }, 'kothin_secret', { expiresIn: '1d' });
+
+//     console.log("New User Created:", newUser);
+
+//     res.json({ status: 200, newUser, token });
+//   } catch (error) {
+//     console.error("Error creating user:", error);
+//     res.status(500).json({ status: 500, error: error.message });
+//   }
+// });
+
+
+
+// const createUser = asyncHandler(async (req, res) => {
+//   try {
+//     const { userName, email, password, mobile, companyName, bisunessAdd, country, city } = req.body;
+
+//     // Check if the user already exists
+//     const findUser = await prisma.user.findUnique({
+//       where: { email: email }
+//     });
+
+//     if (findUser) {
+//       throw new Error("User already exists");
+//     }
+
+//     // Count the number of existing users
+//     const userCount = await prisma.user.count();
+
+//     // Generate the new registration number
+//     const newSerialNumber = userCount + 1;
+//     const newRegNo = `OTG-${newSerialNumber.toString().padStart(4, '0')}`;
+
+//     // Hash the password
+//     const hashedPassword = await bcrypt.hash(password, 10);
+
+//     // Create the new user
+//     const newUser = await prisma.user.create({
+//       data: {
+//         userName: userName,
+//         email: email,
+//         password: hashedPassword, // Store the hashed password
+//         mobile: mobile,
+//         companyName: companyName,
+//         bisunessAdd: bisunessAdd,
+//         country: country,
+//         city: city || null,
+//         regNo: newRegNo,
+//       }
+//     });
+
+//     // Generate JWT token
+//     const token = jwt.sign({ userId: newUser.id }, 'kothin_secret', { expiresIn: '1d' });
+
+//     console.log("New User Created:", newUser);
+
+//     res.json({ status: 200, newUser, token });
+//   } catch (error) {
+//     console.error("Error creating user:", error);
+//     res.status(500).json({ status: 500, error: error.message });
+//   }
+// });
+
+
+
 const createUser = asyncHandler(async (req, res) => {
   try {
-    const { userName, email, password, mobile, companyName, bisunessAdd, country, city  } = req.body;
+    const { userName, email, password, mobile, companyName, bisunessAdd, country, city } = req.body;
 
     // Check if the user already exists
     const findUser = await prisma.user.findUnique({
@@ -15,25 +113,35 @@ const createUser = asyncHandler(async (req, res) => {
     });
 
     if (findUser) {
-      throw new Error("User already exists");
+      return res.status(400).json({ status: 400, error: "User already exists" });
     }
 
-    // Hash the password
-    const hashedPassword = await bcrypt.hash(password, 10);
+    // Start a transaction
+    const newUser = await prisma.$transaction(async (prisma) => {
+      // Count the number of existing users
+      const userCount = await prisma.user.count();
 
-    // Create the new user
-    const newUser = await prisma.user.create({
-      data: {
-        userName: userName,
-        email: email,
-        password: hashedPassword, // Store the hashed password
-        mobile: mobile,
-        companyName: companyName,
-        bisunessAdd: bisunessAdd,
-        country: country,
-        city: city
+      // Generate the new registration number
+      const newSerialNumber = userCount + 1;
+      const newRegNo = `OTG-${newSerialNumber.toString().padStart(4, '0')}`;
 
-      }
+      // Hash the password
+      const hashedPassword = await bcrypt.hash(password, 10);
+
+      // Create the new user
+      return await prisma.user.create({
+        data: {
+          userName: userName,
+          email: email,
+          password: hashedPassword,
+          mobile: mobile,
+          companyName: companyName,
+          bisunessAdd: bisunessAdd,
+          country: country,
+          city: city || null,
+          regNo: newRegNo,
+        }
+      });
     });
 
     // Generate JWT token
@@ -52,6 +160,56 @@ const createUser = asyncHandler(async (req, res) => {
 
 
 
+
+
+
+// const loginUser = asyncHandler(async (req, res) => {
+//   const { credential, password } = req.body;
+
+//   // Validate input
+//   if (!credential || !password) {
+//     return res.status(400).json({ error: 'Email or mobile number and password are required' });
+//   }
+
+//   try {
+//     // Determine if the credential is an email or mobile number
+//     const isEmail = credential.includes('@');
+
+//     // Query database for user with provided email or mobile number and include visaApplies data
+//     const user = await prisma.user.findUnique({
+//       where: isEmail ? { email: credential } : { mobile: credential },
+//       include: {
+//         visa_apply: true,
+//         loan_request: true,
+//       }
+//     });
+
+//     // Verify user exists
+//     if (!user) {
+//       return res.status(401).json({ error: 'Invalid email/mobile or password' });
+//     }
+
+//       const passwordMatch = await bcrypt.compare(password, user.password);
+
+//       // If passwords match, generate a JWT token
+//       if (passwordMatch) {
+//         const token = jwt.sign({ userId: user.id }, 'kothin_secret', { expiresIn: '1d' });
+//         // Send the user data and token in the response
+//         res.json({ user, token });
+//       } else {
+//         return res.status(401).json({ error: 'Invalid email/mobile or password' });
+//       }
+
+
+//     // Compare provided password with hashed password in the database
+
+//   } catch (error) {
+//     console.error('Error logging in:', error);
+//     res.status(500).json({ error: 'Internal server error' });
+//   }
+// });
+
+
 const loginUser = asyncHandler(async (req, res) => {
   const { credential, password } = req.body;
 
@@ -64,18 +222,24 @@ const loginUser = asyncHandler(async (req, res) => {
     // Determine if the credential is an email or mobile number
     const isEmail = credential.includes('@');
 
-    // Query database for user with provided email or mobile number and include visaApplies data
+    // Query database for user with provided email or mobile number and include visaApplies and loan_request data
     const user = await prisma.user.findUnique({
       where: isEmail ? { email: credential } : { mobile: credential },
       include: {
         visa_apply: true,
         loan_request: true,
+        deposit_request: true,
       }
     });
 
     // Verify user exists
     if (!user) {
       return res.status(401).json({ error: 'Invalid email/mobile or password' });
+    }
+
+    // Check if user is approved
+    if (!user.isApproved) {
+      return res.status(403).json({ error: 'You cannot log in without approval' });
     }
 
     // Compare provided password with hashed password in the database
@@ -89,6 +253,7 @@ const loginUser = asyncHandler(async (req, res) => {
     } else {
       return res.status(401).json({ error: 'Invalid email/mobile or password' });
     }
+
   } catch (error) {
     console.error('Error logging in:', error);
     res.status(500).json({ error: 'Internal server error' });
@@ -100,11 +265,15 @@ const loginUser = asyncHandler(async (req, res) => {
 
 
 
+
+
+
 const getUsers = asyncHandler(async (req, res) => {
   const users = await prisma.user.findMany({
     include: {
       visa_apply: true,
       loan_request: true,
+      deposit_request: true,
     }
   })
   return res.json({ status: 200, data: users })
@@ -119,7 +288,7 @@ const getUser = asyncHandler(async (req, res) => {
     where: {
       id: userId
     },
-    include: { visa_apply: true, loan_request: true, },
+    include: { visa_apply: true, loan_request: true,  deposit_request: true,},
   })
   return res.json({ status: 200, data: user })
 });
@@ -158,24 +327,55 @@ const updateUser = asyncHandler(async (req, res) => {
 
 
 
-const isUserApproved = asyncHandler(async (req, res) => {
 
-  const userId = req.params.id
+const isUserApproved = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const { status } = req.body;
+  console.log(req.body);
+  // Validate input
 
   try {
-    // Update the user's isApproved field to true
+    // Update the status in the database
     const updatedUserApproved = await prisma.user.update({
-      where: { id: userId },
-      data: { isApproved: true },
+      where: { id },
+      data: { isApproved: status, },
     });
 
-    // Send the updated user as the response
-    res.json(updatedUserApproved);
+    // Send the updated record as a response
+    res.json({ status: 200, data: updatedUserApproved });
   } catch (error) {
-    // Handle any errors that occur during the update
-    res.status(500).json({ error: error.message });
+    console.error('Error updating user status:', error);
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
+
+
+
+
+
+// const isUserApproved = asyncHandler(async (req, res) => {
+
+//   const userId = req.params.id
+//   const { status } = req.body;
+
+//   console.log(req.body);
+  
+
+
+//   try {
+//     // Update the user's isApproved field to true
+//     const updatedUserApproved = await prisma.user.update({
+//       where: { id: userId },
+//       data: { isApproved: status },
+//     });
+
+//     // Send the updated user as the response
+//     res.json(updatedUserApproved);
+//   } catch (error) {
+//     // Handle any errors that occur during the update
+//     res.status(500).json({ error: error.message });
+//   }
+// });
 
 
 

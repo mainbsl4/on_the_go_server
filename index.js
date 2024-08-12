@@ -11,10 +11,11 @@ const bankDetailsRoute = require("./routes/bankDetailsRoute");
 const visaApplyRoute = require("./routes/visaApplyRoute");
 const loanReqRoute = require("./routes/loanReqRoute");
 const depositRoute = require("./routes/depositRoute");
+const uploadRouter = require("./routes/uploadRoute");
 app.use(cors()); 
 app.use(morgan("dev"));
 app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({extended:false}))
@@ -28,7 +29,7 @@ app.use("/api/mst_bank_details", bankDetailsRoute);
 app.use("/api/visa_apply", visaApplyRoute);
 app.use("/api/loan_request", loanReqRoute);
 app.use("/api/deposit", depositRoute);
-
+app.use("/api/upload", uploadRouter);
 
 
 
