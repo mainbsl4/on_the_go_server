@@ -1,13 +1,10 @@
 const fs = require("fs");
 const asyncHandler = require("express-async-handler");
 
-
-
 const {
   cloudinaryUploadImg,
   cloudinaryDeleteImg,
 } = require("../middleware/cloudinary");
-
 
 // const uploadImages = asyncHandler(async (req, res) => {
 //   // console.log(req.files);
@@ -52,10 +49,6 @@ const uploadImages = asyncHandler(async (req, res) => {
     throw new Error(error);
   }
 });
-
-
-
-
 
 const deleteImages = asyncHandler(async (req, res) => {
   const { id } = req.params;

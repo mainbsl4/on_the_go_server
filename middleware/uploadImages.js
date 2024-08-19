@@ -28,7 +28,6 @@
 //     }
 //   };
 
-
 //   const uploadPhoto = multer({
 //     storage: storage,
 //     fileFilter: multerFilter,
@@ -67,13 +66,6 @@
 // };
 // module.exports = { uploadPhoto, productImgResize, blogImgResize };
 
-
-
-
-
-
-
-
 const multer = require("multer");
 const sharp = require("sharp");
 const path = require("path");
@@ -89,14 +81,15 @@ const storage = multer.diskStorage({
 });
 
 const multerFilter = (req, file, cb) => {
-  if (file.mimetype.startsWith("image") ||  file.mimetype === "application/pdf") {
+  if (
+    file.mimetype.startsWith("image") ||
+    file.mimetype === "application/pdf"
+  ) {
     cb(null, true);
   } else {
     cb({ message: "Unsupported file format" }, false);
   }
 };
-
-
 
 const uploadPhoto = multer({
   storage: storage,

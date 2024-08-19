@@ -8,9 +8,11 @@ generator client {
   provider = "prisma-client-js"
 }
 
+
 datasource db {
-  provider = "postgresql"
+  provider = "mysql"
   url      = env("DATABASE_URL")
+  shadowDatabaseUrl = "mysql://u378412940_shadow_db:Jp%23C7SBJP%2Bw8@srv1042.hstgr.io/u378412940_shadow_db"
 }
 
 model User {

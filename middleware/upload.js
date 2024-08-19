@@ -30,7 +30,7 @@ const fileFilter = (req, file, cb) => {
 };
 
 // Set the storage engine
-const upload = multer({ 
+const upload = multer({
   storage: storage,
   fileFilter: fileFilter
 });
